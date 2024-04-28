@@ -1,0 +1,15 @@
+Java EE with Jboss EAP
+---------------------
+5 days workshop on Java ee with jboss
+agenda:
+Module 1: Introduction to J2EE and JBoss
+Module 2: Web Applications with Servlet and JSP
+Module 3: Enterprise JavaBeans (EJBs) for Server-Side Development 
+Module 4: Persistence and Data Management with JPA and Hibernate 
+Module 5: Messaging and Integration with JMS and JBoss Messaging 
+Module 6: Security and Administration of JBoss 7.3 
+Module 7: Additional topic Spring boot 
+Module 8: DevOps Practices with JBoss EAP 7.3 
+Module 9: Troubleshooting and Debugging 
+Module 10: Microservices Architecture with JBoss EAP
+
