@@ -188,12 +188,155 @@ jstl (jsp std tag lib)
 </form>
 
 
-Jboss basic configuration:
+
+
+
+Hands on Servlet jsp :
+-----------------------------
+pls try running the servlet jsp application on tomcat and jboss eap-7
+ping me in case of any difficulty
+
+we will cover new topic bw 4-5PM as per your time zone
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Jboss basic Administration configuration:
 ----------------------------
 
 Example 1: jboss admin configuration
+---------------------------------
+how to configure username/password so that i can login to jboss using Gui
 
-Example 2: jboss datasource configuration
+step 1: go to C:\JbossEAP_javaee_software\jboss-eap-7.3\bin
+step 2: open cmd and run standalone.bat
+		now visit localhost:8080 to see it working
+		
+step 3: i want to access admin console of my gui
+u need to add an new user 
+>add-user.bat
+
+
+C:\JbossEAP_javaee_software\jboss-eap-7.3\bin>add-user.bat
+
+What type of user do you wish to add?
+ a) Management User (mgmt-users.properties)
+ b) Application User (application-users.properties)
+(a): a
+
+Enter the details of the new user to add.
+Using realm 'ManagementRealm' as discovered from the existing property files.
+Username : superuser
+Password recommendations are listed below. To modify these restrictions edit the add-user.properties configuration file.
+ - The password should be different from the username
+ - The password should not be one of the following restricted values {root, admin, administrator}
+ - The password should contain at least 8 characters, 1 alphabetic character(s), 1 digit(s), 1 non-alphanumeric symbol(s)
+Password :
+
+WFLYDM0097: Password should not be equal to 'admin', this value is restricted.
+Are you sure you want to use the password entered yes/no? yes
+Re-enter Password :
+
+What groups do you want this user to belong to? (Please enter a comma separated list, or leave blank for none)[  ]:
+About to add user 'superuser' for realm 'ManagementRealm'
+Is this correct yes/no? yes
+Added user 'superuser' to file 'C:\JbossEAP_javaee_software\jboss-eap-7.3\standalone\configuration\mgmt-users.properties'
+Added user 'superuser' to file 'C:\JbossEAP_javaee_software\jboss-eap-7.3\domain\configuration\mgmt-users.properties'
+Added user 'superuser' with groups  to file 'C:\JbossEAP_javaee_software\jboss-eap-7.3\standalone\configuration\mgmt-groups.properties'
+Added user 'superuser' with groups  to file 'C:\JbossEAP_javaee_software\jboss-eap-7.3\domain\configuration\mgmt-groups.properties'
+Is this new user going to be used for one AS process to connect to another AS process?
+e.g. for a slave host controller connecting to the master or for a Remoting connection for server to server EJB calls.
+yes/no? no
+Press any key to continue . . .
+
+
+Step 4: i need to run standalone.bat
+
+
+Example 1: how to deployee a war file
+---------------------------------
+just have a war file and upload this
+
+
+
+We should know jdbc:
+---------------------
+jdbc is a api to connect to the datbase
+
+ java app ------------------------------ db
+				jdbc driver
+
+for displaying the data
+--------------------------	
+create the table
+
+create table books(
+     id int not null primary key auto_increment, 
+	 isbn varchar(100) not null, 
+	 title varchar(100) not null, 
+	 price double not null
+);
+ 
+insert into books(isbn, title, price) values('ASZ12433','rich dad poor dad',560);
+insert into books(isbn, title, price) values('ASZ10433','ejb in action',760);
+
+select * from books;
+
+
+
+			
+step 1:
+download the jar for jdbc driver
+	
+step 2: 
+load the driver and get connection object
+
+step 3:
+create Statement and resultset 
+
+step 4: 
+till we have a record i want to display them
+
+
+for instion of the data
+--------------------------	
+step 1:
+download the jar for jdbc driver
+	
+step 2: 
+load the driver and get connection object
+
+step 3:
+use PrepareStatement to insert the records
+
+
+Example 3: jboss datasource configuration
+------------------------------------------
+	connection pooling concept: increase the application performance
+	
+	now we know what is jdbc: API to connect to the database
+	
+	DriverManager.getConnection: performance problem
+	vs
+	dataSource is better in performance?
+	
+	
+
 
 step 1: put driver with 
 C:\jboss-eap-7.3\modules\system\layers\base\com
@@ -208,6 +351,10 @@ step 2: add driver to standalone.xml
 					
 step 2: check connection is working or not?
 
+Example 4: i will use this datasource that is configured in jboss 
+in my application
+
+EJB and CDI
 
 
 
