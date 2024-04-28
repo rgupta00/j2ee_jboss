@@ -13,3 +13,123 @@ Module 8: DevOps Practices with JBoss EAP 7.3
 Module 9: Troubleshooting and Debugging 
 Module 10: Microservices Architecture with JBoss EAP
 
+https://drive.google.com/drive/folders/1idLstDwOGxhiaOCGddyObqIPOES05PWp?usp=drive_link
+
+what we require in advance to do this course:
+-------------------------------------------
+j2se: java 2 std edition aka core java
+	classes ,object...
+	interface abstract classes
+	exception handing
+	collection: aka readymade ds in java
+	java concurrency 
+	jdbc (java database connectivity)
+		
+						Driver?
+		
+		app --------------------------	 mysql/oracle
+										database
+						?
+		api: jdbc 
+	
+j2ee: java 2 enterprise edition ie aka adv java
+
+Module 1: Introduction to J2EE and JBoss
+Module 2: Web Applications with Servlet and JSP
+Module 3: Enterprise JavaBeans (EJBs) for Server-Side Development 
+Module 4: Persistence and Data Management with JPA and Hibernate 
+Module 5: Messaging and Integration with JMS and JBoss Messaging 
+Module 6: Security and Administration of JBoss 7.3 
+Module 7: Additional topic Spring boot 
+Module 8: DevOps Practices with JBoss EAP 7.3 
+Module 9: Troubleshooting and Debugging 
+Module 10: Microservices Architecture with JBoss EAP
+
+
+J2EE histroy
+https://www.baeldung.com/java-enterprise-evolution
+
+
+
+
+Essential sw
+---------------
+jdk setup
+https://www.oracle.com/in/java/technologies/javase/javase8-archive-downloads.html#license-lightbox
+
+tomcat download
+https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.88/bin/apache-tomcat-9.0.88-windows-x64.zip
+
+eclipse ide
+https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/oxygen/R/eclipse-jee-oxygen-R-win32-x86_64.zip
+
+jboss 
+https://developers.redhat.com/content-gateway/file/jboss-eap-7.3.0.zip
+https://developers.redhat.com/content-gateway/file/jboss-eap-7.3.0-installer.jar
+
+wildfly
+https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip
+
+
+
+
+
+
+<form action="add" method="post">
+	Enter userName: <input type="text" name="x"/><br/>
+	Enter password: <input type="text" name="y"/><br/>
+	<input type="submit"/>
+</form>
+
+
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
+<table>
+		<thead>
+			<tr>
+				<th>id</th>
+				<th>isbn</th>
+				<th>title</th>
+				<th>price</th>
+			</tr>
+		</thead>
+		<tbody>
+		<c:forEach var="book" items="${books}">
+			<tr>
+				<td><c:out value="${book.id }"/></td>
+				<td><c:out value="${book.isbn }"/></td>
+				<td><c:out value="${book.title }"/></td>
+				<td><c:out value="${book.price }"/></td>
+			</tr>
+		</c:forEach>
+		</tbody>
+	</table>
+
+
+
+<form action="BookController.do" method="post">
+	<input type="text" name="id" /><br/>
+  Enter isbn:<input type="text" name="isbn" />"/><br/>
+  Enter title:<input type="text" name="title" />"/><br/>
+  Enter price:<input type="text" name="price" /><br/>
+  <input type="submit"/>
+  
+</form>
+
+
+
+
+
+
+
+
+
+
+<form action="BookController.do" method="post">
+	<input type="text" name="id" value="<c:out value="${book.id }"/>"><br/>
+  Enter isbn:<input type="text" name="isbn" value="<c:out value="${book.isbn }"/>"/><br/>
+  Enter title:<input type="text" name="title" value="<c:out value="${book.title }"/>"/><br/>
+  Enter price:<input type="text" name="price" value="<c:out value="${book.price }"/>"/><br/>
+  <input type="submit"/>
+  
+</form>
