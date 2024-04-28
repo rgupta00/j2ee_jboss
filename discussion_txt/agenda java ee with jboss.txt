@@ -72,6 +72,59 @@ https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip
 
 
 
+What we have done so far:
+-------------------------
+* what is the topics for 5 days workshop
+* what is j2ee, jakarta ee
+* web server vs web container vs ejb containers
+* software setup (u can do at your end)
+	first install jdk and setup env variable correctly
+	after that order of installation dont matter
+	mysql or any database must be there
+	i am using mysql create a database with name bookstore
+	
+
+How to write a dynmic web application
+----------------------------------------
+servlet jsp applicatation
+
+
+add two numbers
+mvc design pattern
+now i want to show you how to create a war file from the project: ie how to deploy this application to
+the tomcat server
+
+3 things:
+
+jar file: Java ARchive
+war file: Web ARchive
+ear file: Enterprise ARchive ie for enterprise app	war + ejb project
+
+Book store application
+------------------------
+3 tier arch: mvc patterns
+
+controller layer --------------- dao layer 	-------------- database 
+servlet							data access object
+								CRUD operation
+								C: create
+								R: read
+								U: update
+								D: delete
+
+
+view layer
+jsp
+jstl (jsp std tag lib)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -107,14 +160,14 @@ https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip
 
 
 
-<form action="BookController.do" method="post">
-	<input type="text" name="id" /><br/>
-  Enter isbn:<input type="text" name="isbn" />"/><br/>
-  Enter title:<input type="text" name="title" />"/><br/>
-  Enter price:<input type="text" name="price" /><br/>
-  <input type="submit"/>
-  
-</form>
+	<form action="BookController.do" method="post">
+		<input type="text" name="id" /><br/>
+	  Enter isbn:<input type="text" name="isbn" />"/><br/>
+	  Enter title:<input type="text" name="title" />"/><br/>
+	  Enter price:<input type="text" name="price" /><br/>
+	  <input type="submit"/>
+	  
+	</form>
 
 
 
@@ -133,3 +186,46 @@ https://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip
   <input type="submit"/>
   
 </form>
+
+
+Jboss basic configuration:
+----------------------------
+
+Example 1: jboss admin configuration
+
+Example 2: jboss datasource configuration
+
+step 1: put driver with 
+C:\jboss-eap-7.3\modules\system\layers\base\com
+ and put mysql module
+ 
+step 2: add driver to standalone.xml
+
+                    <driver name="mysql" module="com.mysql">
+                        <driver-class>com.mysql.jdbc.Driver</driver-class>
+                        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+                    </driver>
+					
+step 2: check connection is working or not?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+http://www.sgaemsolutions.com/2019/06/preparing-your-spring-boot-app-to.html
