@@ -325,6 +325,39 @@ step 3:
 use PrepareStatement to insert the records
 
 
+Assignment: 
+-----------
+create servlet jsp customerapp
+which allow you to keep customer crud operation
+
+class customer{
+	id, name, age, phone
+}
+interface CustomerDao{
+
+}
+class CustomerDaoImpl impl.... CustomerDao{
+
+}
+controller
+jsp
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Example 3: jboss datasource configuration
 ------------------------------------------
 	connection pooling concept: increase the application performance
@@ -349,30 +382,122 @@ step 2: add driver to standalone.xml
                         <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
                     </driver>
 					
-step 2: check connection is working or not?
+step 3: Create datasource connection pool in jboss using gui
+check connection is working or not?
 
 Example 4: i will use this datasource that is configured in jboss 
 in my application
 
+
+java:/MySqlDS
+
+checking configuration of datasouce connection: java:/MySqlDS
+________________________________________________________
+
+
+	# Each datasource contains a pool of database connections 
+	that are reserved as soon as the server is started up. 
+
+
+	# Applications acquire a database connection from the datasource by looking it
+		up on the JNDI tree and then calling getConnection().
+
+
+	Connection result = null;
+	try {
+			Context initialContext = new InitialContext();
+			DataSource datasource =(DataSource)initialContext.lookup("java:/mydb");
+			result = datasource.getConnection();
+	}
+	catch ( Exception ex )
+ 	{
+		log("Cannot get connection: " + ex);
+	}
+
+Using DI
+-------------
+	@Resource(lookup="java:/MySqlDS")
+	private DataSource dataSource;
+	
+	
 EJB and CDI
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 http://www.sgaemsolutions.com/2019/06/preparing-your-spring-boot-app-to.html
+
+
+
+Spring boot with jboss eap-7
+------------------------------
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.2.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.jboss.spring</groupId>
+	<artifactId>spring-jboss</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<name>spring-jboss</name>
+	<description>Demo project for Spring Boot</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+			        <artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+				<exclusion>
+				   <groupId>ch.qos.logback</groupId>
+				   <artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	
+	
+	<!-- servlet dependency -->
+	    <dependency>
+		    <groupId>javax.servlet</groupId>
+		    <artifactId>javax.servlet-api</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+	    
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

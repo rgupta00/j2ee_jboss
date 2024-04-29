@@ -1,0 +1,716 @@
+
+Day 2: Java EE with Jboss
+___________________________
+
+	=> Quick recap
+	=> Understanding EJB, Need of EJB?
+	=> EJB Container
+	=> EJB hello world
+	=> DI and JNDI
+	=> Type of EJB: SLSB, SFSB, Singleton
+	=> EJB life cycle 
+	=>CDI
+	=>Interceptors
+	=>Callbacks
+	=>Timer service
+
+
+
+ Java EE 7 introduction 
+_______________________
+	=> Group of JSR for creating dynamic distributed web applicatoins
+	=>  Provide set of technologies for server-side Java development. 
+	=> JSF 2.2, EJB 3.2, JPA 2.1, Servlet 3.1, JSP 2.2, JMS 2.0, JAX-RS, JAX-WS,JAXB 2.2
+
+
+Understanding EJB, Need of EJB
+_____________________________
+3 tier arch
+controller ----------------service ----------- dao layer	 db
+
+EJB : enterprise java bean and it contain the business logic
+	* validate a atm card
+	* crud opeation using ejb
+	* web service using ejb
+	
+EJB : "ejb container" is resposable for running the ejb code
+	jboss eap
+	wildfly
+	weblogic
+	
+	we live in our house
+	(ejb)			(containers)
+	
+
+	
+What is EJB?
+_________________
+	An EJB platform is for building portable, 
+	reusable and scalable business applications using the Java programming language. 
+	
+	EJB is a component or framework that lets you build enterprise Java applications 
+	without having to revent services such as transactions, 
+	security, automated persistence which allows you to to spend more time 
+	on the business logic than the infrastructure code.
+
+	EJB 3 is simpler and lighter than its previous versions, 
+	EJB 3 components are now more like Plain Old Java Objects (POJO) with special powers. 
+	There are three types of EJB components
+
+
+Where EJB fits?
+_________________
+
+ service layer to provide business logic implemeations?
+ 
+ 
+Container services?
+_________________
+ejb container vs web container?
+
+
+ * ejb container is reposible for manging the life cycle of ejb
+  init() service()  destroy() : servlet
+  ejb also have a life cycle
+  
+ * ejb container also provide u remote client communication?
+ 
+ * ejb container also provide something called "Depdendncy Injection" CDI (Context dependency injection)
+	Design pattern which help us to achive loose coupling?
+	
+ * state managment : stateful ejb vs stateless ejb
+ 
+ * connection pooling 
+ 
+ * messaging
+ 
+ * tx mgt
+ 
+ * concurrency support
+ 
+ * interceptor
+ 
+ *Asy support
+
+
+EJB Hello world Example
+______________________
+EJB types:
+	Session bean: business logic
+	synchronos
+		1. stateless
+		2. statefull
+		3. singleton
+		4. ayn ejbs
+		
+	
+	Entity bean   X (till only ejb 2 , ejb 3 it was removed)
+		JPA
+		
+	Message driven bean
+	 Asyn, producer and consumer
+	 app1 ---------	app2
+
+
+
+EJB hello world
+_________________
+step 1: create a web application, create a servlet that will invoke ejb
+
+
+step 2: create interface for ejb
+@Local
+public interface AtmVerfifyLocal {
+	public boolean isValid(String cardNumber);
+}
+
+@Remote
+public interface AtmVerfifyRemote {
+	public boolean isValid(String cardNumber);
+}
+
+step 3: create ejb with BL
+
+@Stateful
+public class AtmVerfify implements AtmVerfifyRemote,AtmVerfifyLocal  {
+
+	@Override
+	public boolean isValid(String cardNumber) {
+		//Business logic write inside ejb
+		Integer val=Integer.parseInt(cardNumber);
+		
+		return val%2==0;
+	}
+
+}
+
+
+step 4: need to invoke ejb in servlet 
+	2 ways:
+		1. using dependency injection 				
+		 : push approach: ejb container will create the object of ejb and inject to the controller 
+		 
+		2. using jndi (java naming directory interface)
+		: pull approach:ejb container will create the object of ejb but controller need to pull it 
+
+
+Step 4 (a)
+---------------
+@WebServlet("/atmCardControlller")
+public class AtmCardControlller extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    
+	@EJB
+	private AtmVerfifyRemote atmVerfifyRemote; //push approach
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+			throws ServletException, IOException {
+		
+		PrintWriter out=response.getWriter();
+		out.print("atm card is valid or not?"+ atmVerfifyRemote.isValid("6465665656"));
+	}
+}
+
+Step 4 (b)
+--------
+using jndi:
+Java Naming and Directory Interface
+give a logical name to the ejb (so that we can call this easily)
+
+	java:global/atmcardapp/AtmVerfify!com.logic.AtmVerfifyRemote
+
+@WebServlet("/atmCardControlller2")
+public class AtmCardControlller2 extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    
+	
+	private AtmVerfifyRemote atmVerfifyRemote; 
+	
+	
+	
+	//pull: we are pulling the instance of ejb from the container
+	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		try {
+			InitialContext initialContext=new InitialContext();
+			atmVerfifyRemote =(AtmVerfifyRemote)initialContext.lookup("java:global/atmcardapp/AtmVerfify!com.logic.AtmVerfifyRemote");
+			
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+			throws ServletException, IOException {
+		
+		PrintWriter out=response.getWriter();
+		out.print("atm card is valid or not?"+ atmVerfifyRemote.isValid("64656"));
+	}
+}
+
+
+Demo Life Cycle method
+_________________
+@PostConstruct
+@PreDestroy
+
+
+@Stateless
+public class AtmVerfify implements AtmVerfifyRemote,AtmVerfifyLocal  {
+
+	@PostConstruct
+	public void postConstruct() {
+		System.out.println("before creating the object of ejb");
+	}
+	@Override
+	public boolean isValid(String cardNumber) {
+		//Business logic write inside ejb
+		Integer val=Integer.parseInt(cardNumber);
+		
+		return val%2==0;
+	}
+
+	@PreDestroy
+	public void preDestory() {
+		System.out.println("this method is going to be called before preDestory");
+	}
+}
+
+
+Note: life cycle method should not return anything and must be public and not static
+
+--------------------------
+jar: ejb project can be created and packed as jar file
+
+war: servlet jsp application
+
+ear: which can have war + jar combo
+------------------------------
+
+	client req------------ war ------------- jar
+						 ----------------------
+							ear
+							
+
+
+EJB singleton bean example and various annotations
+______________________
+step 1: create a ejb project
+
+step 2: create same AtmVerfify EJB
+
+step 3: write a singleton bean to test this
+
+@Singleton //only one object of ejb
+@Startup //hey container create the sigleton bean in advance
+//singleton bean may have race condition : concurrency issues
+public class MySingletonBean {
+	//is to test other ejb
+	
+	@EJB
+	private AtmVerifyLocal atmVerifyLocal;
+	
+	//try to do jndi mapping
+	//java:jboss/exported/ejbdemo/AtmVerify!com.demo.AtmVerifyRemote
+	
+	@PostConstruct
+	public void test() {
+		System.out.println("---------------------------------");
+		System.out.println(atmVerifyLocal.isValid("465454"));
+		System.out.println("---------------------------------");
+	}
+	
+
+}
+Concurrency management singleton bean
+___________________________________
+ singleton bean may have race condition
+ u need to handle race condition
+ 
+ 1. CMC (Container managed Concurrency)-- container		easy
+ 2. BMC (Bean managed Concurrency)------- programmer    synchrozied keyword
+ 
+@Singleton(name="shoppingCounter")
+@Startup
+//@ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
+@ConcurrencyManagement(ConcurrencyManagementType.BEAN)
+@AccessTimeout(value=1000, unit=TimeUnit.SECONDS)
+public class ShoppingCounter {
+	
+	private int counter;
+	
+	void postConstruct() {
+		counter=0;
+	}
+	
+	//@Lock(LockType.WRITE)
+	synchronized int increment() {
+		++counter;
+		return counter;
+	}
+	
+	//@Lock(LockType.WRITE)
+	synchronized int decrement() {
+		--counter;
+		return counter;
+	}
+	
+	//@Lock(LockType.READ)
+	synchronized int getCounter() {
+		return counter;
+	}
+
+}
+
+
+
+
+3.Stateful session bean (Simple shopping cart)
+_______________________________________________
+
+
+Step 1: create a dynamic web application
+
+step 2: create ejb with interface
+
+
+@Remote
+public interface CartRemote {
+	void putItem(String itemId, int qty);
+	void removeItem(String itemId);
+	Hashtable<String, Integer> getItem();
+}
+
+
+
+
+@Stateful
+@LocalBean
+public class Cart implements CartRemote {
+	
+    public Cart() {}
+    
+    private Hashtable<String, Integer> cart;
+    
+    @PostConstruct
+    public void postConstruct() {
+    	cart=new Hashtable<>();
+    }
+    
+    @PostActivate
+    public void postPassivate() {
+    	cart=new Hashtable<>();
+    }
+    
+	@Override
+	public void putItem(String itemId, int qty) {
+		cart.put(itemId, qty);
+	}
+	
+
+	@Override
+	public void removeItem(String itemId) {
+		cart.remove(itemId);
+	}
+
+	@Override
+	public Hashtable<String, Integer> getItem() {
+		return cart;
+	}
+
+    @PrePassivate
+    public void prePassivate() {
+    	cart=null;
+    }
+    
+    @PreDestroy
+    public void preDestroy() {
+    	cart=null;
+    }
+}
+
+
+
+Step 3: create a servlet that use to invoke business method from ejb
+
+@WebServlet("/shoppingCartServlet")
+public class ShoppingCartServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	// java:module/Cart!com.shoppingcart.logic.CartRemote
+
+	private CartRemote cartRemote;
+
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		cartRemote = (CartRemote) request.getSession().getAttribute("cart");
+
+		if (cartRemote == null) {
+			// EJB is not present in the HTTP session so let's fetch a new one from the
+			// container
+
+			try {
+				InitialContext ic = new InitialContext();
+				cartRemote = (CartRemote) ic.lookup("java:module/Cart!com.shoppingcart.logic.CartRemote");
+
+				// put EJB in HTTP session for future servlet calls
+
+				request.getSession().setAttribute("cart", cartRemote);
+
+			} catch (NamingException e) {
+				throw new ServletException(e);
+			}
+		}
+		
+			PrintWriter out = response.getWriter();
+			
+			String action = request.getParameter("action");
+			String item = request.getParameter("item");
+			String quantity = request.getParameter("quantity");
+
+			out.println("<html><body><h1>Cart Manager</h1>");
+		
+			if (action.equals("add"))
+			{
+				cartRemote.putItem(item, Integer.parseInt(quantity));
+			}
+			else if (action.equals("remove")) 
+			{
+				cartRemote.removeItem(item);
+			} 
+			else if (action.equals("list")) 
+			{
+			Hashtable<String, Integer> items = cartRemote.getItem();
+			Enumeration<String> itemNames = items.keys();
+			while (itemNames.hasMoreElements()) 
+			{
+				String itemId = (String) itemNames.nextElement();
+				out.println("Item id: " + itemId + " Quantity : "+ items.get(itemId));
+				out.println("<BR>");
+			}
+			
+			}
+			out.println("</body></html>");
+			
+		
+	}
+
+}
+
+Step 4: invoke ejb and test it
+
+	Now testing it
+
+	http://localhost:8080/shoppingcart/shoppingCartServlet?action=add&item=125&quantity=3
+
+	http://localhost:8080/app-03/CartManager?action=add&item=123&quantity=2
+	
+	http://localhost:8080/app-03/CartManager?action=list
+
+	http://localhost:8080/app-03/CartManager?action=remove&item=123
+
+	http://localhost:8080/app-03/CartManager?action=list
+
+
+	http://localhost:8080/shoppingcart/CartManager?action=add&item=125&quantity=3
+
+
+
+
+
+Context Dependancy Injection
+___________________________
+	CDI== Dependency Injection 
+
+beans.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+                      http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
+    bean-discovery-mode="all">
+</beans>
+
+
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.inject.Qualifier;
+
+@Qualifier
+@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Other {
+}
+
+
+
+	Mention alternative in beans.xml
+<alternatives>
+		<class>com.pojo.SomeBeanTester</class>
+</alternatives>
+
+
+
+
+
+EJB interceptors
+_________________
+
+	=> An interceptor method can be defined for session
+		and message-driven beans (MDBs)
+
+
+	=> Use Cases
+
+		-> Perform additional security checks before a critical business method that transfers
+			more than $100,000 dollars
+
+		-> Do some performance analysis to compute the time it takes to perform the task
+
+		-> Do additional logging before or after the method invocation
+
+
+	=> How to define interceptors?
+	 -----------------------------
+		An interceptor class is denoted by the @Interceptor annotation
+		on the bean class with which it is associated. 
+
+		In the case of multiple interceptor classes: @Interceptors annotation is used
+
+		Methods that are annotated with @AroundInvoke have signature:
+
+		public Object <METHOD>(InvocationContext) throws Exception
+
+
+		The definition of InvocationContext is as follows:
+
+	package javax.ejb;
+	public interface InvocationContext {
+		public Object getBean();
+		public java.lang.reflect.Method getMethod();
+		public Object[] getParameters();
+		public void setParameters(Object[] params);
+		public EJBContext getEJBContext();
+		public java.util.Map getContextData();
+		public Object proceed() throws Exception;
+	}
+
+
+	Meaning:The following list describes the methods in the preceding code:
+	---------------------------------------------------------------------------
+
+
+		getBean() returns the instance of the bean on which the method was called.
+
+		getMethod() returns the method on the bean instance that was called.
+
+		getParameters() returns the parameters for the method call.
+	
+		setParameters() modifies the parameters used for the method call.
+
+		getEJBContext() gives the interceptor methods access to the bean’s EJBContext.
+	
+		getContextData() allows values to be passed between interceptor methods in the
+			same InvocationContext instance using the Map returned.
+
+		proceed() invokes the next interceptor, if there is one, or invokes the target bean
+			method
+
+
+
+	Ex:
+
+
+	@AroundInvoke
+	public Object TimerLog (InvocationContext ctx) throws Exception
+	{
+		String beanClassName = ctx.getClass().getName();
+		String businessMethodName = ctx.getMethod().getName();
+		String target = beanClassName + "." + businessMethodName ;
+		long startTime = System.currentTimeMillis();
+		System.out.println ("Invoking " + target);
+		try {
+			return ctx.proceed();
+		}
+
+		finally {
+				System.out.println("Exiting " + target);
+				long totalTime = System.currentTimeMillis() - startTime;
+				System.out.println("Business method " + businessMethodName +
+				"in " + beanClassName + "takes " + totalTime + "ms to execute");
+			}
+	}
+
+
+
+
+Steps:
+1. Create an interceptor binding type
+2. Create an interceptor
+3. Assign interceptor to the bean
+4. Enable interceptor in beans.xml
+5. Test it
+
+
+
+Step-1:Create an interceptor binding type
+--------------------------------------------
+
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import javax.interceptor.InterceptorBinding;
+
+@InterceptorBinding
+@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.FIELD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Logger {
+
+}
+
+
+Step 2:Create interceptor and apply annotation
+---------------------------------------------
+
+@Logger
+@Interceptor
+public class LoggingInterceptor {
+
+	public LoggingInterceptor() {}
+
+	@AroundInvoke
+	public Object log(InvocationContext ctx) throws Exception {
+		System.out.println("Before method invocation");
+		try{
+			return ctx.proceed();
+		}
+		finally{
+			System.out.println("After method......");
+		}
+	}
+
+}
+
+
+
+Step-3:Apply interceptor to bean
+-------------------------------------
+
+@Logger
+public class MyBean {
+	public void sayHi(){
+		System.out.println("hello ....");
+	}
+}
+
+
+
+Step-4:Create beans.xml and configure interceptor…
+-------------------------------------------------------
+
+<interceptors>
+ 	<class>com.beans.interceptor.LoggingInterceptor</class>
+ </interceptors>
+
+     
+
+
+
+Step-5: Test it…
+-----------------------------------------------------
+
+
+@Singleton
+@LocalBean
+@Startup
+public class Tester {
+	@Inject
+	MyBean mybean;
+   
+    public Tester() {
+        // TODO Auto-generated constructor stub
+    }
+    
+    @PostConstruct
+    public void main(){
+    	mybean.sayHi();
+    } 
+}
+
+
+
