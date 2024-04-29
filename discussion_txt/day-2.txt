@@ -714,3 +714,12 @@ public class Tester {
 
 
 
+
+
+
+
+
+
+https://stackoverflow.com/questions/22502824/simple-rest-api-with-wildfly-8
+
+
