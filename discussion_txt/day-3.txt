@@ -1,0 +1,361 @@
+JEE 7 training with wildfly 8
+-----------------------------
+ Serssion 2:
+ ----------
+	=> Configuration jndi connection pool
+	=> DB programming with EJB
+	=> EJB JPA
+	=> CRUD JPA
+	=> CRUD application EJB JPA servlet jsp
+
+
+
+
+checking configuration of datasouce connection: java:/MySqlDS
+________________________________________________________
+
+
+	# Each datasource contains a pool of database connections 
+	that are reserved as soon as the server is started up. 
+
+
+	# Applications acquire a database connection from the datasource by looking it
+		up on the JNDI tree and then calling getConnection().
+
+
+	Connection result = null;
+	try {
+			Context initialContext = new InitialContext();
+			DataSource datasource =(DataSource)initialContext.lookup("java:/mydb");
+			result = datasource.getConnection();
+	}
+	catch ( Exception ex )
+ 	{
+		log("Cannot get connection: " + ex);
+	}
+
+
+
+
+DB programming with EJB
+__________________________
+
+step 1: 
+---------
+java:/MySqlDS
+
+
+create table book
+(
+	id int not null primary key,
+	title varchar(20) not null,
+	price int not null,
+	author varchar(20) not null,
+	publisher varchar(20) not null,
+	year int not null
+
+
+);
+
+
+insert into book(id, title, price, author,publisher ,year)values(121,'core java head first',500, 'katthy','oreally',2005);
+insert into book(id, title, price, author,publisher ,year)values(191,'SCJP 1.8',550, 'katthy','oreally',2004);
+
+
+
+select * from book;
+
+
+
+step-2
+----------
+Use datasource connection  java:/MySqlDS
+
+	
+	public class Book{
+		
+		private int id;
+
+		private String title;
+		private int price;
+		private String author;
+		private String publisher;
+		private int year;
+
+
+
+@Remote
+public interface BookDAO {
+	void addBook (Book book);
+}
+
+
+
+@Stateless
+public class BookDAOImp implements BookDAO {
+
+	private Connection connection;
+
+	@Resource(lookup = "java:/MySqlDS")
+	private DataSource dataSource;
+
+	@PostConstruct
+	public void initialize() {
+		System.out.println("In PostConstruct");
+		try {
+			connection = dataSource.getConnection();
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		}
+	}
+
+	public void addBook(Book book) {
+		try {
+			PreparedStatement statement = connection
+					.prepareStatement("insert into book(id, title, price, author,publisher ,year) values(?,?,?,?,?,?)");
+			statement.setInt(1, book.getId());
+			statement.setString(2, book.getTitle());
+			statement.setInt(3, book.getPrice());
+			statement.setString(4, book.getAuthor());
+			statement.setString(5, book.getPublisher());
+			statement.setInt(6, book.getYear());
+			statement.execute();
+		} catch (Exception sqle) {
+			sqle.printStackTrace();
+		}
+	}
+
+	@PreDestroy
+	public void releaseResources() {
+		System.out.println("In PreDestroy");
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+} 
+
+
+
+
+	
+JPA with EJB CRUD application
+_______________________________
+
+
+
+	Step 1: Create POJO annotated with JPA annotations
+	------------------------------------------------
+
+	Hello World JPA POJO:
+
+
+		@Entity
+		public class Book implements Serializable {
+			private static final long serialVersionUID = 1L;
+			@Id
+			@GeneratedValue
+			private long id;
+
+			@NotNull
+			private String title;
+			private int price;
+			private String author;
+			private String publisher;
+			private String year;
+
+
+
+		.........
+		.............
+
+
+
+
+
+
+	Step 2: update persistance.xml
+	---------------------------------
+
+	<persistence version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence 							
+	http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+		<persistence-unit name="demo_jpa" transaction-type="JTA">
+			<jta-data-source>java:/mydb</jta-data-source>
+				<class>com.model.Customer</class>
+
+				<properties>
+					<property name="showSql" value="true" />
+					<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+					<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+					</properties>
+		</persistence-unit>
+	</persistence>
+
+
+
+
+
+	Step 3: Create an EJB 
+	---------------------------------------
+		@Remote
+		public interface BookDao {
+			public List<Book> getAllBooks();
+			public Book getBookById(long bookId);
+			public Book  addBook(Book book);
+			public Book updateBook(long bookId, Book book);
+			public Book deleteBook(long bookId);
+		}
+
+
+
+
+	Implementation:
+	-----------------
+
+		
+		@Stateless
+		public class BookDaoImp implements BookDao {
+		
+			@PersistenceContext
+			private EntityManager em;
+			
+			
+		    public BookDaoImp() {}
+		
+			@Override
+			public List<Book> getAllBooks() {
+				return em.createQuery("from Book").getResultList();
+			}
+		
+			@Override
+			public Book getBookById(long bookId) {
+				return em.find(Book.class, bookId);
+			}
+		
+			@Override
+			public void addBook(Book book) {
+				 em.persist(book);
+			}
+		
+			@Override
+			public void updateBook(Book book) {
+				 em.merge(book);
+			}
+		
+			@Override
+			public void deleteBook(long bookId) {
+				em.remove(bookId);
+			}
+		
+		}
+
+
+
+	2.Create an singleton to test it !
+	--------------------------
+
+	@Singleton
+	@LocalBean
+	@Startup
+	public class Main {
+
+	BookDao bookDao;
+			
+		    public Tester() {}
+		  
+		    @PostConstruct
+		    public void test(){
+		    	System.out.println("--------------");
+		    	Book book=new Book("head first", 3333, "kathy", "oreally", "2005");
+		    	
+		    	bookDao.addBook(book);
+		    	
+		    	System.out.println("------------------");
+		    }
+	}
+
+
+
+
+	JPA with servlet Without EJB (Need to start the transaction)
+	------------------------------------------------------------
+
+
+	@WebServlet("/Tester")
+	public class Tester extends HttpServlet {
+	
+	@PersistenceUnit(name="app")
+	EntityManagerFactory emf;
+	
+
+	//Need to start an transaction ( as servlet is not ejb !)
+
+	@Resource
+	private UserTransaction userTransaction;
+
+
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		EntityManager em=emf.createEntityManager();
+
+		//Adding an Book, Need to start an transaction
+		
+		try{
+			userTransaction.begin();
+			
+			Book b=new Book(..........);
+			............
+			............
+			
+			em.persist(b);
+			
+			userTransaction.commit();
+
+			System.out.println("===========saved=================");
+		}catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
+		....................
+		....................
+	}
+
+	
+
+	}
+
+
+	
+	JPA with servlet With EJB No Need to start the transaction, as EJB are transactional
+	---------------------------------------------------------------------------------
+
+
+		
+		@WebServlet("/BookController")
+		public class BookController extends HttpServlet {
+		
+			@EJB
+			private BookDao bookDao;
+			
+			
+			protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+					throws ServletException, IOException {
+		
+				List<Book> books=bookDao.getAllBooks();
+				
+				RequestDispatcher rd=request.getRequestDispatcher("show.jsp");
+				request.setAttribute("books", books);
+				rd.forward(request, response);	
+				
+			}
+		
+		}
+
+
+http://www.datadisk.co.uk/html_docs/ejb/ejb3.htm
