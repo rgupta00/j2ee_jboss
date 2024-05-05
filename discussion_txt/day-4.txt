@@ -1,0 +1,1001 @@
+day 4
+=========
+
+Jboss basic admin recap:
+-------------------------
+Example 1: jboss installataion and create user
+----------------------------
+
+Example 2: jboss datasource configuration
+------------------------------------------
+	connection pooling concept: increase the application performance
+	
+	now we know what is jdbc: API to connect to the database
+	
+	DriverManager.getConnection: performance problem
+	vs
+	dataSource is better in performance?
+	
+
+
+step 1: put driver with 
+C:\jboss-eap-7.3\modules\system\layers\base\com
+ and put mysql module
+ 
+step 2: add driver to standalone.xml
+
+                    <driver name="mysql" module="com.mysql">
+                        <driver-class>com.mysql.jdbc.Driver</driver-class>
+                        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+                    </driver>
+					
+step 3: Create datasource connection pool in jboss using gui
+check connection is working or not?
+
+Example 4: i will use this datasource that is configured in jboss 
+in my application
+
+
+java:/MySqlDS
+
+
+Example 3: jboss messaging configuration
+------------------------------------------
+Step 1: update standalone-full.xml
+<jms-queue name="testingQueue" entries="java:jboss/exported/jms/queue/testingQueue"/>
+
+Step 2: run standalone with full mode
+
+C:\jboss-eap-7.3\bin>standalone.bat -c standalone-full.xml
+
+step 3: create application user with guest role
+foo123 username
+foo123 password
+
+
+
+
+Web service with JBoss EAP
+	REST web service 
+	SOAP web service 
+
+Messaging with JBoss EAP
+
+
+
+REST=REpresentational State Transfer 
+_______________________________________
+
+
+# Introduction to RESTful WS and JAX-RS
+# http status code
+# Hello World web service
+# Annotations
+# CRUD operation json /xml response
+# testing rest api with postman
+# Converting data b/w xml and Java with JAXB
+# exception handling, Using WebApplicationException
+		
+
+Introduction to RESTful WS 
+
+
+	What is REST?
+		# Architectural style which is based on web-standards and the HTTP 
+		protocol
+
+		# REST first described by Roy Fielding in 2000
+		# In a REST based architecture everything is a resource can be accessed by 		
+		http protocol
+
+		# Every resource should support the HTTP common operations
+		# REST allows that resources have different representations, e.g. text, 		
+		xml, json etc
+
+
+
+	Three Fundamental Aspects of the REST Design Pattern
+		1. Resources
+		2. URLs
+		3. Simple Operations
+
+	HTTP method (operations) supported 
+		The PUT, GET, POST and DELETE methods are typical used
+		 in REST based architectures. 
+	
+		GET	==> Reading access of the resource without side-effects 
+			==> The resource is never changed via a GET request
+
+
+		PUT 	==> creates a new resource, must also be idempotent 
+
+		DELETE 	==> removes the resources. 
+
+		POST 	==> updates an existing resource 
+
+
+	Why REST ?
+
+		==> REST can be consumed by any client even a web browser with ajax and JS
+		==> REST is lightweight
+		=> Don't require XML parsing
+		=> Don't require an SOAP header for every messages
+
+	Where REST fits?
+
+	Good for :
+		# Web services
+		# Limited bandwidth(smaller message size)
+		# Limited resources( no xml parsing required)
+		# Exploring data over internet
+		# combining content from various source in an web browser
+
+
+http status code:
+
+1XX : informational , ack
+2XX: Success
+	200 OK
+	201 CREATED
+	204 NO CONTENT
+
+3XX: Redirection, ask client to send req somewhere else
+	302: Found
+	304:Not modified
+	307: Temporary redirect
+
+4XX: Client Error, Client make error in request
+	400: bad request
+	401: unauthorized
+	403: forbidden, not right access
+	404: not found
+	415: unsupported media type
+
+5xx: server error, request is valid but server face problme
+	500: internal server error
+	
+	
+Restful Web Services Frameworks and APIs  : JAX-RS
+
+			=> The Java API for RESTful Web Services  JAX-RS
+
+			=> Uses annotations to make POJOs and resources available through HTTP 
+
+			==> Jersey is a production quality reference implementation of 	JAX-RS API from Sun
+
+			=> Other Vendors: CXF (Apache), RESTEasy(JBoss) and Restlet
+
+
+
+
+	<persistence version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence 							
+	http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+		<persistence-unit name="demo_jpa" transaction-type="JTA">
+			<jta-data-source>java:/mydb</jta-data-source>
+				<class>com.model.Customer</class>
+
+				<properties>
+					<property name="showSql" value="true" />
+					<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+					<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+				</properties>
+		</persistence-unit>
+	</persistence>
+
+JAX-RS with Jboss EAP
+_______________________
+
+
+Intrduction to JAX-WS Overview
+
+	=> JAX-WS is a JEE specification for building message oriented /RPC oriented web services
+
+	=> Minimum coding , JAX-WS API hides the complexity form developer
+
+	=> JAX-WS 2.0 supports the Web Services Interoperability (WS-I) Basic Profile Version 1.1 
+
+	=> JAX-WS is also one of the foundations of web service interoperability Technologies (WSIT). 
+
+	=> RI of JAX-WS project Metro that also include Tango which handles the WSIT
+
+	=> Java Version 6 onwards JAX-WS can be used in Java SE 
+
+
+Approaches for WS Development
+________________________
+
+	1. bottom-up approach
+	____________________
+		Bottom-up approach: Start with Java Classes
+
+	2. top-down approach
+	 ______________________
+		Top-down approach: Start with WSDL
+
+
+
+
+	Hello World example
+	___________________
+
+	steps:
+		1. Creating our Web Service Endpoint
+		2. Creating the Web Service Client using wsimport command.
+
+
+	1. Creating Web Service Endpoint
+	
+
+	2. Creating WS client
+		wsimport -target 2.0 -keep http://localhost:8080/demo/CalculatorService?wsdl
+
+
+
+	What is  wsimport ?
+		==> The wsimport command-line tool processes an existing WSDL file and generates 
+			the required portable support classes (SEI) for developing JAX-WS web service 
+			applications 
+
+		==>Essentially, it is going to automatically generate all of the class files involved with 
+		the SOAP, XML and communication aspects of our web service!
+
+
+  	    CalculatorService service = new CalculatorService();
+
+        //create proxy
+        Calculator proxy = service.getCalculatorPort();
+
+        int a = new Integer("22").intValue();
+        int b = new Integer("33").intValue();
+        
+        //invoke
+        System.out.println("Sum of the arguments = " + proxy.sum(a,b));
+	    System.out.println("Multiple of the arguments = " + proxy.multiply(a,b));
+
+
+	Now using @WebService annotation:
+	______________________________
+	
+	@WebService:  should be placed on an interface and implementation class
+	_________________________________________________________________________
+
+	name==> name of web service mapped to the name attribute of the wsdl:portType
+
+	serviceName==>actual name of published service, mapped to name wsdl:service 
+		element in WSDL document
+			(Default value is name of SEI implementation class)
+
+	targetNamespace==> Secifies the target namespace under which the service is defined.
+		(Default value is package name)
+
+ 	wsdlLocation==>  Specifies the URI at which the services WSDL contract is stored. 
+			(Default value is the URI at which the service is deployed)
+
+
+
+
+  	endpointInterface==>  Specifies the full name of the SEI that the 
+				implementation class implements
+				(This attribute is used in implementation class)
+
+	
+	portName=> The name of the endpoint at which the service is published and 
+		is mapped to the name attribute of the wsdl:port element 
+		in WSDL contract document
+		(Default value is the append Port to the name of the
+			 services implementation class.
+			This is used in implementation class).
+
+
+
+
+
+	More Annotations,Create an web service:
+	_______________________________________
+
+
+	@WebService(serviceName = "CalculatorWS")
+	public class Calculator {
+		@WebMethod
+		public int sum(@WebParam (name= "value1") int value1, 
+			@WebParam( name="value2" ) int value2) {
+			return value1 + value2;
+		}
+	}
+
+
+
+	Another example:
+	________________
+
+
+@WebService(name = "calapp", serviceName = "myCalService",
+ portName = "myCalAppPort", targetNamespace = "https://www.kronos.in/")
+public class CalculatorImpl{
+	
+	@WebResult(name = "addResult")
+	@WebMethod(operationName = "addMethod")
+	public int add(
+			@WebParam(name = "x", targetNamespace = "https://www.kronos.in/") int a,
+			@WebParam(name = "y") int b){
+		return a+b;
+	}
+	
+	@WebResult(name = "multiplyResult")
+	@WebMethod(operationName = "multiplyMethod")
+	public int multiply(
+			@WebParam(name = "x", targetNamespace = "https://www.kronos.in/") int a,
+			@WebParam(name = "y") int b){
+		return a*b;
+	}
+}
+
+
+
+Another example:
+________________
+
+
+	@WebService(name="ShoppingCartCatalog" , portName="ShoppingCartPort",
+ 	serviceName="ShoppingCartService", targetNamespace="http://www.shoppingcart.com")
+
+	public class ProductCatalog {
+
+	@WebMethod(action="getShoppingCartCategories", operationName="getShoppingCartCategoriesOperation")
+		public List<String> getProductCategories(){
+			List<String>list=new ArrayList<>();
+			list.add("laptop");
+			list.add("books");
+			list.add("games");
+			return list;
+		}
+	}
+
+
+
+
+Using Interface: design to interface , Server side SEI
+________________________________________________________
+
+
+	@WebService
+	public interface ProductCalegoriesInterface {
+		public abstract List<Product> getProductCategories();
+
+	}
+
+
+
+	@WebService(endpointInterface="com.shoppingcart.model.ProductCalegoriesInterface")
+	public class ProductCalegoriesInterfaceImpl implements ProductCalegoriesInterface{
+	
+		@WebResult(name="products")
+		@Override
+		public List<Product> getProductCategories() {
+			List<Product>list=new ArrayList<>();
+			list.add(new Product("121", "TV", 5555.7));
+			list.add(new Product("21", "Laptop", 25555.7));
+			list.add(new Product("121", "Mouse", 5.6));
+			return list;
+		}
+	
+	}
+
+
+
+Using JAXB annotations	xml <--> java
+_______________________________________
+
+
+	Create an POJO with annotations:
+
+
+	@XmlRootElement(namespace="https://www.kronos.in/")
+	@XmlType(propOrder={"id","name","price"})
+	@XmlAccessorType(XmlAccessType.FIELD)
+	
+	public class Product {
+		@XmlElement(name="p_name", nillable=false, required=true)
+		private String name;
+		@XmlElement(name="p_id", nillable=false, required=true)
+		private String id;
+		@XmlElement(name="p_price", nillable=false, required=true)
+		private double price;
+
+
+
+
+	//Dont forget to have default ctr in POJO class...
+	Create an web service:
+
+
+	@WebService
+	public class ProductCatalog {
+
+		@WebMethod
+		@WebResult(name="Product")
+		public List<Product> getProductCategories(){
+			List<Product>list=new ArrayList<>();
+			list.add(new Product("121", "TV", 5555.7));
+			list.add(new Product("21", "Laptop", 25555.7));
+			list.add(new Product("121", "Mouse", 5.6));
+			return list;
+		}
+	}
+
+
+
+Handling faults
+________________
+
+	Create User defind exception:
+
+	public class InvalidInputException extends Exception {
+
+		private static final long serialVersionUID = 1L;
+		private String errorDetails;
+
+		public InvalidInputException(String reason, String errorDetails) {
+			super(reason);
+			this.errorDetails=errorDetails;
+		
+		}
+		public String getFaultInfo(){
+			return errorDetails;
+		}
+	
+	}
+
+
+
+Creating Web service:
+
+
+	@WebService
+	public class ShopInfo {
+
+		@WebMethod
+		@WebResult(name = "shopOutput")
+		public String getShopInfo(@WebParam(partName = "shopInput") String property)
+				throws InvalidInputException {
+			String response = null;
+			if ("shopName".equals(property))
+				response = "Mega Mart";
+			else if ("since".equals(property))
+				response = "2001";
+			else
+				throw new InvalidInputException("invalid input", property
+					+ " not found!");
+			return response;
+		}
+	}
+
+
+
+
+
+What is docker?
+_______________
+
+Docker containers wrap a  piece of software in a  complete filesystem that  
+contains everything needed to  run: code, runtime, system  tools, system libraries –  
+anything that can be installed  on a server. This guarantees 
+ that the software will always  run the same, regardless of  its environment.
+
+
+Why docker?
+____________
+Developers use Docker to eliminate “works on my machine” problems  
+when collaborating on code with co-workers.
+
+Operators use Docker to run and manage apps side-by-side in  isolated containers to get 
+better compute density.
+
+Enterprises use Docker to build agile software delivery pipelines to  ship new features faster,
+ more securely and with confidence for both  Linux and Windows Server apps.
+
+
+Docker Container
+_________________
+A container is a runtime instance of an image what the image becomes in memory when actually executed. 
+It runs completely isolated from the host environment by default, 
+only accessing host files and ports if configured to do so.
+
+
+Docker Image?
+____________
+An image is a lightweight, stand-alone, executable package that includes 
+everything needed to run a piece of software, including the code, 
+a runtime, libraries, environment variables, and config files
+
+So an existing fellow developer will create an image of his environment
+ and share it with the new developer. 
+The new developer will just have to run the image as a docker container.
+
+
+Essential docker commands:
+____________________
+
+
+Checking docker version
+________________________
+docker -v
+docker --version
+
+
+docker info
+___________
+give complete info about docker, how many container runnnig, pause etc
+
+
+docker --help
+______________
+give help about each command
+
+
+docker images
+____________
+give details of all images on local docker installation
+
+
+docker images --help
+
+
+delete all docker existing iamages:
+
+ docker rmi -f $(docker images -a -q)
+
+for window:
+https://stackoverflow.com/questions/44785585/how-can-i-delete-all-local-docker-images
+
+docker pull
+____________
+docker pull ubuntu:latest		docker image pull ubuntu (new command)
+docker pull --help
+
+
+docker rmi
+___________
+to remove one/more docker images	docker image rm <image-id> (new command)
+docker rmi --help
+
+
+docker ps
+__________
+docker ps -a				docker container ls -a (new commands)
+ it show all container wheter running or not
+
+
+docker run
+____________
+ docker pull ubuntu:latest
+ docker container run -it ubuntu
+ apt-get update && apt-get install git
+ apt-get install openjdk-11-jdk
+
+ docker run -it ubuntu		docker container run -it ubuntu
+
+
+docker start
+_____________
+ docker start <id>		docker container start <id>
+docker stop 
+__________
+ docker stop <id>		docker container stop <id>
+
+docker stats
+_______________
+show the status of running container
+docker stats
+
+
+running tomcat image:
+____________________
+docker image pull tomcat:latest
+docker container run -d -p 8080:8080 tomcat
+docker container run -d -p 8090:8080 tomcat
+
+(stop any container that is runnnig on port 8080 in docker)
+
+docker exec -it cid sh
+
+docker container logs -f <id>
+
+
+running container
+____________________
+docker container run --name my_first_con busybox:latest
+
+
+to delete all containers		docker container rm c0
+_________________________
+
+docker rm $(docker ps -a -q)
+
+to delete all images:
+____________________________
+docker rmi $(docker images -q)
+
+
+
+
+
+It deletes everything(container , images, cache, etc..)
+____________________________________________________
+docker system prune
+
+
+
+ Docker image
+______________
+to see all images
+__________________
+docker image ls
+
+
+
+How to pull Docker image?
+_________________________
+docker pull python:latest
+
+inspecting an image:
+_________________
+docker inspect ubuntu
+
+ history of an image:
+_________________
+docker history ubuntu
+
+
+
+classic and modern docker commnads:
+_________________________________
+docker pull ubuntu (old command)
+or 
+docker image pull ubuntu (new command)
+
+
+old command are confusing ex: list the name of container , list name of images
+docker ps (docker process) give list of container (not very intitive name)
+docker ps -a (stop container)
+
+new command:
+___________
+docker container ls -a  ( same as docker ps -a)
+docker image ls -a
+
+
+
+docker help:
+____________
+
+docker help
+
+Management Commands: modern commands
+_______________________
+  app*        Docker App (Docker Inc., v0.9.1-beta3)
+  builder     Manage builds
+  buildx*     Build with BuildKit (Docker Inc., v0.5.1-docker)
+  config      Manage Docker configs
+  container   Manage containers
+  context     Manage contexts
+  image       Manage images
+  manifest    Manage Docker image manifests and manifest lists
+  network     Manage networks
+  node        Manage Swarm nodes
+  plugin      Manage plugins
+  ......
+  ........
+
+
+
+Commands: classical commands
+_____________
+  attach      Attach local standard input, output, and error streams to a running container
+  build       Build an image from a Dockerfile
+  commit      Create a new image from a container's changes
+  cp          Copy files/folders between a container and the local filesystem
+  create      Create a new container
+  diff        Inspect changes to files or directories on a container's filesystem
+  events      Get real time events from the server
+  exec        Run a command in a running container
+  export      Export a container's filesystem as a tar archive
+  history     Show the history of an image
+  images      List images
+  import      Import the contents from a tarball to create a filesystem image
+  ......
+  .....
+
+docker run --name my_first_con busybox:latest
+
+docker run --detach --interactive --tty --name alpine alpine:latest
+
+
+Dockerfile
+_______________ 
+
+create a file with name Dockerfile (dont give extension)
+
+FROM ubuntu
+MAINTAINER rajeev gupta <rgupta.mtech@gmail.com>
+RUN apt-get update
+CMD ["echo","welcome to docker file"]	
+
+
+Creating images
+______________
+docker build .
+docker build -t my_img .
+docker build -t my_docker_file .
+
+
+
+web server vs web container
+
+												web container
+
+client ----------- web server -----------------web container
+
+												web container
+			
+					ngix						tomcat 
+					httpd server
+
+		
+How to run nginx image with volume
+---------------------------------
+docker run --name some-nginx -v /home/raj/Desktop/demo:/usr/share/nginx/html:ro -d nginx
+
+
+Example mongodb with docker:
+________________________
+
+mongodb with docker:
+____________________
+what is port mapping?
+What is volume mapping?
+
+mkdir mongodb_exp
+cd mongodb_exp
+
+spring boot +mongdb
+
+assignment  : you have to srping boot app with mongodb
+
+docker pull mongo:latest
+
+				outside internal
+
+
+docker run -d -p 2717:27017 --name mymongo mongo:latest
+
+C:\mongodb\db
+
+docker run -d -p 2717:27017 -v C:/mongodb/db:/data/db --name mymongo mongo:latest
+
+
+docker run -d -p 2717:27017 -v /home/raj/Desktop/db:/data/db --name mymongo mongo:latest
+
+docker exec -it mymongo bash
+
+run all mongo commands
+
+mongo localhost:2717
+mongosh
+
+use rajdb;	
+db.employees.insert({empName:"ekta", age:"36", salary:"60000"})
+db.employees.find()
+
+
+
+devOps
+dev---- admin
+spring 
+jar----> docker image----> docker hub----> pull docker image ---> run of his machine”
+:)
+
+
+How to containerized a spring boot 
+
+
+
+Approach to create docker images :
+--------------------------------
+1. using docker file
+	we need to write a docker file with list of all instructions
+	which can be passed to the docker server to generate docker image using
+	given instructions
+	
+2. Buildpack
+	Buildpack is the project initiated by heroku and pivotal and now hosted on CNCF
+	it is simplified containization ,as we dont need to write docker file 
+	https://buildpacks.io/
+3. google gib
+	jib is open source java tool maintained by google for building images of java application only
+	it is simplified containization ,as we dont need to write docker file 
+
+Comparision of 3 apporach:
+---------------------------------
+https://buildpacks.io/features/
+https://medium.com/spring-boot/speed-up-and-downsize-spring-boot-built-image-from-dockerfile-to-buildpack-to-jib-aad0674643ee#:~:text=For%20building%20image%20speed%3A,is%20always%20slower%20than%20others.
+
+
+	
+Approach 1: using docekr file : Docker hello world spring boot:
+------------------------------------------------------------
+server:
+  port: 8080
+spring:
+  application:
+    name: 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+
+step 1: create empapp project, create hello controller 
+
+	Give final name inside build :<finalName>empapp</finalName>
+
+@RestController
+public class HelloController {
+    @Autowired
+    private InstanceInformationService instanceInformationService;
+
+    @GetMapping(path="hello-world")
+    public String hello(){
+        return "hello empapp v2  :"+instanceInformationService.retrieveInstanceInfo();
+    }
+}
+
+
+@Service
+public class InstanceInformationService {
+
+	private static final String HOST_NAME = "HOSTNAME";
+
+	private static final String DEFAULT_ENV_INSTANCE_GUID = "LOCAL";
+
+	
+	@Value("${" + HOST_NAME + ":" + DEFAULT_ENV_INSTANCE_GUID + "}")
+	private String hostName;
+
+	public String retrieveInstanceInfo() {
+		return hostName.substring(hostName.length()-5);
+	}
+
+}
+
+try to call it locally
+http://localhost:8080/actuator/health/readiness
+
+
+
+
+
+
+
+step 2: Create Dockerfile
+FROM openjdk:17-alpine
+
+
+
+FROM openjdk:21
+MAINTAINER email="rgupta.mtech@gmail.com"
+EXPOSE 8080
+ADD target/empapp.jar empapp.jar
+ENTRYPOINT ["java","-jar","empapp.jar"]
+
+
+
+step 3: create image using command
+
+docker build -t rgupta00/empapp:1.2 .
+
+docker image ls
+
+
+step 4: run image 
+docker container run --name producer -p 8080:8080 -d rgupta00/empapp:1.2
+
+docker container logs <id>
+
+docker container logs -f <id>
+
+step 5: push image to docker hub
+
+first login : docker login
+
+then run command : 
+	docker tag empapp:1.2 rgupta00/empapp:1.2
+	docker push rgupta00/empapp:1.2
+
+step 6: pull image from the docker hub
+
+docker pull rgupta00/empapp:1.2
+
+step 7: other person now can pull the image
+
+	remove the images 
+	docker images
+	docker image rmi <imgid> -f
+	
+now pull the image and run it
+
+docker run --name empapp -p 8080:8080 rgupta00/empapp:1.2
+
+
+
+
+Approach 2: Spring boot with Build pack step to follow:
+-------------------------
+ 
+1. Add the configuration in the pom.xml
+
+          <plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<image>
+						<name>rgupta00/${project.artifactId}:v1</name>
+					</image>
+				</configuration>
+			</plugin>
+			
+2. Run the maven command from the location where pom.xml is visible
+mvn spring-boot:build-image
+
+3. Execute the docker command
+docker run -p 8090:8080 rgupta00/empapp:v1
+
+
+
+
+Approach 2: google gib step to follow:
+-------------------------
+Jib builds containers without using a Dockerfile or requiring a Docker installation.
+ You can use Jib in the Jib plugins for Maven or Gradle, or you can use the Jib Java library.
+ 
+ https://cloud.google.com/java/getting-started/jib
+ https://github.com/GoogleContainerTools/jib
+ 
+  
+ 
+1. Add the configuration in the pom.xml
+
+<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>3.4.1</version>
+				<configuration>
+					<from>
+						<image>openjdk:21</image>
+					</from>
+					<to>
+						<image>rgupta00/${project.artifactId}:v2</image>
+					</to>
+				</configuration>
+			</plugin>
+	  
+	  
+2. Run the maven command from the location where pom.xml is visible
+mvn compile jib:dockerBuild
+
+3. Execute the docker command
+docker run -p 8090:8080 rgupta00/empapp:v1
+
+

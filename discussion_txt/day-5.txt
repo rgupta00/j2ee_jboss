@@ -1,0 +1,6 @@
+Day 5:
+--------------
+Spring boot with JBoss
+Spring boot Jax RS application
+Docker container
+K8S deployment of application

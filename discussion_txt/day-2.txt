@@ -486,8 +486,63 @@ Step 4: invoke ejb and test it
 
 Context Dependancy Injection
 ___________________________
-	CDI== Dependency Injection 
 
+
+	CDI= Dependency Injection 
+	
+Spring : dependency injection.. use to produce loose coupling bw the software layer
+you dont have to change the code if you want a different object to be injected
+
+CDI vs spring di
+
+Step 1: create a ejb project
+
+step 2: create interface and clasess
+
+public interface MyAlgo {
+	public String calculation();
+}
+
+
+@Default
+public  class MyAlgoImplemantionOne implements MyAlgo{
+	@Override
+	public String calculation() {
+		return "MyAlgoImplemantionOne";
+	}
+
+}
+
+@Alternative
+public  class MyAlgoImplemantionTwo implements MyAlgo{
+
+	@Override
+	public String calculation() {
+		return "MyAlgoImplemantionTwo";
+	}
+
+}
+
+step 3: create a singleton bean to test the application
+
+@Singleton
+@Startup
+public class TestApp {
+
+	@Inject
+	private MyAlgo myAlgo;
+	
+	@PostConstruct
+	public void test() {
+		System.out.println("---------------------------");
+		System.out.println(myAlgo.calculation());
+		System.out.println("---------------------------");
+	}
+	
+}
+
+setp 4: must have a configuration file
+------------------------------------
 beans.xml
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -497,8 +552,18 @@ beans.xml
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
                       http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
     bean-discovery-mode="all">
+	   <!--  <alternatives>
+    	<class>com.demo.MyAlgoImplemantionTwo</class>
+    </alternatives> -->
 </beans>
 
+step 5: comment and uncomment to understand which bean is injected
+   <!--  <alternatives>
+    	<class>com.demo.MyAlgoImplemantionTwo</class>
+    </alternatives> -->
+	
+
+step 6: you can write a custom annotation and ask cdi to inject the bean with that annotation?
 
 
 import java.lang.annotation.ElementType;
@@ -522,6 +587,13 @@ public @interface Other {
 </alternatives>
 
 
+
+spring vs ejb:
+--------------------
+spring : DI, AOP(aspect orientetd programming)
+ejb: CDI, Interceptor
+
+Interceptor: is a ejb  concept to provide cross cutting concern?
 
 
 
