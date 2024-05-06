@@ -1,11 +1,29 @@
 Day 5:
 --------------
+
 Spring boot with JBoss
-Spring boot CRUD application as jar file
+Introduction to microservice 
+Microservice application as jar file
 Docker application
-K8S deployment of application
+Kubernetes deployment of application
 
+Spring vs J2EE
+----------------
 
+spring is a open source framework to create java based application
+to simplify spring framework ==> spring boot
+
+spring boot is wounderful framework to create distributed application
+used to create microservice
+
+spring boot:
+	java based or j2ee based web application
+	REST application
+	
+Hello world of spring boot:
+
+Maven : is a build tool that download jar file automatically
+	jar file
 
 
 Spring boot with jboss eap-7
@@ -103,6 +121,23 @@ Docker Image?
 
 Essential docker commands:
 
+docker --version
+docker -v
+
+docker --help
+docker images
+
+pull some images ubuntu
+docker image pull ubuntu:latest
+
+how to run this images
+docker run ubuntu
+
+docker run -dit ubuntu
+
+
+
+
 for window:
 https://stackoverflow.com/questions/44785585/how-can-i-delete-all-local-docker-images
 
@@ -164,7 +199,7 @@ ENTRYPOINT ["java","-jar","empapp.jar"]
 
 step 3: create image using command
 
-docker build -t rgupta00/empapp:1.2 .
+docker build -t rgupta00/bookstore:1.1 .
 
 docker image ls
 
@@ -196,7 +231,11 @@ step 7: other person now can pull the image
 	
 now pull the image and run it
 
-docker run --name empapp -p 8080:8080 rgupta00/empapp:1.2
+
+docker build -t rgupta00/bookstore:1.2 .
+
+docker push rgupta00/bookstore:1.2
+docker run -d --name=bs2 -p 8081:8080 rgupta00/bookstore:1.2
 
 
 

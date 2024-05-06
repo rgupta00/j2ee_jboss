@@ -9,12 +9,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bookstore.dao.Book;
 import com.bookstore.dao.BookDao;
+import com.bookstore.service.InstanceInformationService;
 
 @RestController
 public class BookRestController {
 	
 	@Autowired
 	private BookDao bookDao;
+	
+    @Autowired
+    private InstanceInformationService instanceInformationService;
+
+    @GetMapping(path="hello-world")
+    public String hello(){
+        return "hello bookstore v2  :"+instanceInformationService.retrieveInstanceInfo();
+    }
 	
 	//get all the books
 	@GetMapping(path="books")
