@@ -1,6 +1,202 @@
 Day 5:
 --------------
 Spring boot with JBoss
-Spring boot Jax RS application
-Docker container
+Spring boot CRUD application as jar file
+Docker application
 K8S deployment of application
+
+
+
+
+Spring boot with jboss eap-7
+------------------------------
+<version>2.2.2.RELEASE</version>
+<java.version>1.8</java.version>
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.2.2.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.jboss.spring</groupId>
+	<artifactId>spring-jboss</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+	<name>spring-jboss</name>
+	<description>Demo project for Spring Boot</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+			        <artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+				<exclusion>
+				   <groupId>ch.qos.logback</groupId>
+				   <artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	
+	
+	<!-- servlet dependency -->
+	    <dependency>
+		    <groupId>javax.servlet</groupId>
+		    <artifactId>javax.servlet-api</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+	    
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
+Spring boot CRUD application as jar file
+----------------------------------------
+
+
+
+Docker application
+----------------------
+Docker containers wrap a  piece of software in a  complete filesystem that  
+contains everything needed to  run: code, runtime, system  tools, system libraries –  
+anything that can be installed  on a server. This guarantees 
+ that the software will always  run the same, regardless of  its environment.
+
+
+Why docker?
+Docker Container
+Docker Image?
+
+Essential docker commands:
+
+for window:
+https://stackoverflow.com/questions/44785585/how-can-i-delete-all-local-docker-images
+
+How to containerized a spring boot 
+
+
+Docker hello world spring boot:
+-------------------------------
+
+
+step 1: create empapp project, create hello controller 
+
+	Give final name inside build :<finalName>empapp</finalName>
+
+@RestController
+public class HelloController {
+    @Autowired
+    private InstanceInformationService instanceInformationService;
+
+    @GetMapping(path="hello-world")
+    public String hello(){
+        return "hello empapp v2  :"+instanceInformationService.retrieveInstanceInfo();
+    }
+}
+
+
+@Service
+public class InstanceInformationService {
+
+	private static final String HOST_NAME = "HOSTNAME";
+
+	private static final String DEFAULT_ENV_INSTANCE_GUID = "LOCAL";
+
+	
+	@Value("${" + HOST_NAME + ":" + DEFAULT_ENV_INSTANCE_GUID + "}")
+	private String hostName;
+
+	public String retrieveInstanceInfo() {
+		return hostName.substring(hostName.length()-5);
+	}
+
+}
+
+try to call it locally
+
+
+step 2: Create Dockerfile
+FROM openjdk:17-alpine
+
+
+
+FROM openjdk:8
+MAINTAINER email="rgupta.mtech@gmail.com"
+EXPOSE 8080
+ADD target/empapp.jar empapp.jar
+ENTRYPOINT ["java","-jar","empapp.jar"]
+
+
+
+step 3: create image using command
+
+docker build -t rgupta00/empapp:1.2 .
+
+docker image ls
+
+
+step 4: run image 
+docker container run --name producer -p 8080:8080 -d rgupta00/empapp:1.2
+
+docker container logs <id>
+
+docker container logs -f <id>
+
+step 5: push image to docker hub
+
+first login : docker login
+
+then run command : 
+	docker tag empapp:1.2 rgupta00/empapp:1.2
+	docker push rgupta00/empapp:1.2
+
+step 6: pull image from the docker hub
+
+docker pull rgupta00/empapp:1.2
+
+step 7: other person now can pull the image
+
+	remove the images 
+	docker images
+	docker image rmi <imgid> -f
+	
+now pull the image and run it
+
+docker run --name empapp -p 8080:8080 rgupta00/empapp:1.2
+
+
+
